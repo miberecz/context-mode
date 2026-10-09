@@ -3,7 +3,7 @@
   "version": "1.0.169",
   "type": "module",
   "description": "MCP plugin that saves 98% of your context window. Works with Claude Code, Gemini CLI, VS Code Copilot, OpenCode, and Codex CLI. Sandboxed code execution, FTS5 knowledge base, and intent-driven search.",
-  "author": "Mert Koseoğlu",
+  "author": "Mert Koseo\u011flu",
   "license": "Elastic-2.0",
   "keywords": [
     "mcp",
@@ -42,7 +42,7 @@
   },
   "omp": {
     "name": "context-mode",
-    "description": "Save 98% of your context window in OMP — sandboxed code execution, FTS5 search, hard-block curl/wget, session continuity across compaction.",
+    "description": "Save 98% of your context window in OMP \u2014 sandboxed code execution, FTS5 search, hard-block curl/wget, session continuity across compaction.",
     "extensions": [
       "./build/adapters/omp/plugin.js"
     ]
@@ -98,13 +98,13 @@
     "test:compare": "npx tsx tests/context-comparison.ts",
     "test:ecosystem": "npx tsx tests/ecosystem-benchmark.ts",
     "install:openclaw": "node -e \"if(process.platform==='win32'){console.error('OpenClaw install requires bash (Git Bash or WSL)');process.exit(1)}else{require('child_process').execSync('bash scripts/install-openclaw-plugin.sh',{stdio:'inherit'})}\"",
-    "postinstall": "node scripts/postinstall.mjs"
+    "postinstall": "node scripts/postinstall.mjs",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "@clack/prompts": "^1.0.1",
     "@mixmark-io/domino": "^2.2.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
-    "@opencode/plugin": "^2.0.4",
     "better-sqlite3": "^12.6.2",
     "picocolors": "^1.1.1",
     "turndown": "^7.2.0",
@@ -118,7 +118,8 @@
     "esbuild": "^0.27.3",
     "tsx": "^4.21.0",
     "typescript": "^5.7.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "@opencode/plugin": "^2.0.4"
   },
   "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b",
   "engines": {
