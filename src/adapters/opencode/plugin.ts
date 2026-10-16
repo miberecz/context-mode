@@ -43,6 +43,34 @@ import { AdapterPlatformType, OpenCodeAdapter } from "./index.js";
 import { PLATFORM_ENV_VARS } from "../detect.js";
 import { zod3ShapeToV4 } from "./zod3tov4.js";
 
+// ── SIGCHLD repair (OpenCode 2.0.29+ Bun hosts) ─────────────
+// OpenCode's Bun-compiled host can inherit SIGCHLD=SIG_IGN from its launcher.
+// An ignored SIGCHLD makes the kernel auto-reap children, so every waitpid() in
+// this process fails with ECHILD and all spawn-based tooling breaks — ctx_execute,
+// ctx_batch_execute's command phase, ctx_fetch_and_index, the doctor's server
+// test, and OpenCode's own glob/ripgrep. Node resets SIGCHLD at startup; Bun does
+// not. Installing a JS listener makes Bun install a real handler, which restores
+// normal reaping.
+//
+// Conditional, so it is a byte-for-byte no-op on a healthy host (including hosts
+// that already reset the disposition), and Linux-only. Wrapped end to end so an
+// unreadable procfs or unexpected format can never break plugin load. The flag
+// prevents stacking listeners if the module is imported more than once.
+const sigchldGlobal = globalThis as { __ctxSigchldRepaired?: boolean };
+if (process.platform === "linux" && !sigchldGlobal.__ctxSigchldRepaired) {
+  sigchldGlobal.__ctxSigchldRepaired = true;
+  try {
+    const sigIgnLine = readFileSync("/proc/self/status", "utf8")
+      .split("\n")
+      .find((line) => line.startsWith("SigIgn"));
+    const sigIgnMask = sigIgnLine ? Number.parseInt(sigIgnLine.split(/\s+/)[1], 16) : 0;
+    const chldIgnored = ((sigIgnMask >> 16) & 1) === 1; // SIGCHLD = signal 17 -> bit 16
+    if (chldIgnored) process.on("SIGCHLD", () => {});
+  } catch {
+    /* non-Linux or unreadable procfs — leave the host untouched */
+  }
+}
+
 // ── Types ─────────────────────────────────────────────────
 
 /** KiloCode/OpenCode plugin input — both platforms pass at least `directory`. */
